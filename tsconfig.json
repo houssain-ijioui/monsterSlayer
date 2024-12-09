@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "ES6",                // Use ES6 for the output
+    "module": "ESNext",             // Use modern module system
+    "outDir": "./dist",             // Output directory for compiled files
+    "rootDir": "./",                // Root directory for source files
+    "esModuleInterop": true,        // Allow default imports from modules without default exports
+    "strict": true                  // Enable strict mode for better type checking
+  },
+  "include": ["app.ts", "features.ts"],            // Files to include in the compilation
+  "exclude": ["node_modules"]       // Exclude node_modules
+}
