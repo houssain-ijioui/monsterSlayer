@@ -5,13 +5,32 @@ interface LocationItem {
     text: string
 }
 
+interface Weapon {
+    name: string,
+    power: number
+}
 
+interface Monster {
+    name: string,
+    level: number,
+    health: number,
+    maxHealth: number
+}
 
 
 // STATS
 let xp: number = 0;
 let health: number = 100;
 let gold: number = 50;
+let inventory: string[] = ["stick"];
+let currentWeaponIndex: number = 0;
+let currentMonsterIndex: number;
+
+
+// STATS TEXT
+const xpText = document.querySelector<HTMLElement>("#xpText");
+const healthText = document.querySelector<HTMLElement>("#healthText");
+const goldText = document.querySelector<HTMLElement>("#goldText");
 
 // CONTROLS
 const button1 = document.querySelector<HTMLButtonElement>("#button1");
@@ -22,20 +41,45 @@ const button3 = document.querySelector<HTMLButtonElement>("#button3");
 const text = document.querySelector<HTMLElement>("#text");
 
 
-
-
+// MONSTER
+const monsterStats = document.querySelector<HTMLElement>("#monsterStats");
+const monsterName = document.querySelector<HTMLElement>("#monsterName");
+const monsterHealthText = document.querySelector<HTMLElement>("#monsterHealth");
 
 
 // FUNCTIONS
 const buyHealth = () => {
-    console.log("buy health");
+    if (gold >= 10) {
+        gold -= 10;
+        health += 10;
+        goldText?.innerText = gold;
+        healthText?.innerText = health;
+    } else {
+        text?.innerText = "You do not have enough gold to buy health.";
+    }
 }
 
 const buyWeapon = () => {
-    console.log("buy weapon");
+    if (gold >= 30) {
+        if (currentWeaponIndex >= 3) {
+            text?.innerText = `you already have the most powerfull weapon ${inventory}.`;
+            button2?.innerText = "Sell weapon for 15 gold";
+            button2?.onclick = sellWeapon;
+        } else {
+            gold -= 30;
+            goldText?.innerText = gold;
+            let newWeapon: string = weapons[currentWeaponIndex + 1]["name"];
+            inventory.push(newWeapon);
+            currentWeaponIndex++;
+            text?.innerText = `You bought ${newWeapon}. In your inventory you have ${inventory}.`;
+        }
+    } else {
+        text?.innerText = "you don't have enough gold to buy a new weapon."
+    }
 }
 
 const goTown = () => {
+    monsterStats?.style.display = "none";
     update(locations[0])
 }
 
@@ -48,29 +92,40 @@ const goCave = () => {
 }
 
 const fightDragon = () => {
-    console.log("fight dragon");
+    currentMonsterIndex = 2;
+    goFight();
 }
 
 const fightSlime = () => {
-    console.log("fight slime");
+    currentMonsterIndex = 0;
+    goFight();
 }
 
 const fightBeast = () => {
-    console.log("fight beast");
+    currentMonsterIndex = 1;
+    goFight();
+}
+
+const goFight = () => {
+    update(locations[3]);
+    monsterStats?.style.display = "block";
+    monsterName?.innerText = monsters[currentMonsterIndex]["name"];
+    monsterHealthText?.innerText = monsters[currentMonsterIndex]["health"];
 }
 
 const attack = () => {
-    console.log("attack");
+    text?.innerText = `The ${monsters[currentMonsterIndex]["name"]} attacks.`;
+    text?.innerText += ` You attack it with your ${weapons[currentWeaponIndex]["name"]}.`;
+    applyDamage()
 }
 
 const dodge = () => {
-    console.log("dodge");
+    text?.innerText = `You dodged the attack from ${monsters[currentMonsterIndex]["name"]}`;
 }
 
-const run = () => {
-    console.log("run");   
+const sellWeapon = () => {
+    console.log("sell weapon");
 }
-
 
 function update(location: LocationItem) {
     text?.innerText = location.text;
@@ -80,6 +135,29 @@ function update(location: LocationItem) {
     button1?.onclick = location["button functions"][0];
     button2?.onclick = location["button functions"][1];
     button3?.onclick = location["button functions"][2];
+}
+
+
+const applyDamage = () => {
+    let weaponPower: number = weapons[currentWeaponIndex]["power"];
+    let monster: Monster = monsters[currentMonsterIndex];
+
+    let myDamage: number =
+        Math.floor(weaponPower - (monster.level * 2) + ((monster.maxHealth - monster.health) / 10) - ((100 - health) / 20));
+
+    let monsterDamage: number =
+        Math.floor((monster.level * 3) - ((monster.maxHealth - monster.health) / 15) + ((100 - health) / 25));
+
+    
+    // subtract from my health the monster damage
+    monsterDamage > 0 && (health -= monsterDamage);
+    healthText?.innerText = health;
+
+    // subtract my damage from monster current healt
+    myDamage > 0 && (monster.health -= myDamage);
+    monsterHealthText?.innerText = monster.health;
+    console.log("my damage", myDamage);
+    console.log(monsters[currentMonsterIndex]);
 }
 
 
@@ -114,5 +192,35 @@ const locations: Array<LocationItem> = [
         "button text": ["Attack", "Dodge", "Run"],
         "button functions": [attack, dodge, goTown],
         text: "You are fighting a monster."
+    },
+]
+
+
+const weapons: Array<Weapon> = [
+    { name: "stick", power: 5 },
+    { name: "dagger", power: 30 },
+    { name: "claw hammer", power: 50 },
+    { name: "sword", power: 100 }
+]
+
+
+const monsters: Array<Monster> = [
+    {
+        name: "slime",
+        level: 2,
+        health: 15,
+        maxHealth: 15
+    },
+    {
+        name: "fanged beast",
+        level: 8,
+        health: 60,
+        maxHealth: 60
+    },
+    {
+        name: "dragon",
+        level: 20,
+        health: 300,
+        maxHealth: 300
     },
 ]
