@@ -24,7 +24,7 @@ let health: number = 100;
 let gold: number = 50;
 let inventory: string[] = ["stick"];
 let currentWeaponIndex: number = 0;
-let currentMonsterIndex: number;
+let currentMonsterIndex: number | null;
 
 
 // STATS TEXT
@@ -116,7 +116,7 @@ const goFight = () => {
 const attack = () => {
     text?.innerText = `The ${monsters[currentMonsterIndex]["name"]} attacks.`;
     text?.innerText += ` You attack it with your ${weapons[currentWeaponIndex]["name"]}.`;
-    applyDamage()
+    applyDamage();
 }
 
 const dodge = () => {
@@ -125,6 +125,35 @@ const dodge = () => {
 
 const sellWeapon = () => {
     console.log("sell weapon");
+}
+
+const restart = () => {
+    xp = 0;
+    health = 100;
+    gold = 50;
+    inventory = ["stick"];
+    currentWeaponIndex = 0;
+    currentMonsterIndex = 0;
+    update(locations[0]);
+    xpText?.innerText = 0;
+    healthText?.innerText = 100;
+    goldText?.innerText = 50;
+}
+
+const lose = () => {
+    update(locations[4]);
+}
+
+
+const killMonster = () => {
+    update(locations[5]);
+    monsterStats?.style.display = "none";
+    monsters[currentMonsterIndex].health = monsters[currentMonsterIndex].maxHealth;
+    currentMonsterIndex = null;
+    gold += 20;
+    xp += 20;
+    goldText?.innerText = gold;
+    xpText?.innerText = xp;
 }
 
 function update(location: LocationItem) {
@@ -152,12 +181,16 @@ const applyDamage = () => {
     // subtract from my health the monster damage
     monsterDamage > 0 && (health -= monsterDamage);
     healthText?.innerText = health;
+    if (health <= 0) {
+        lose();
+    }
 
     // subtract my damage from monster current healt
     myDamage > 0 && (monster.health -= myDamage);
     monsterHealthText?.innerText = monster.health;
-    console.log("my damage", myDamage);
-    console.log(monsters[currentMonsterIndex]);
+    if (monster.health <= 0) {
+        killMonster();
+    }
 }
 
 
@@ -192,6 +225,24 @@ const locations: Array<LocationItem> = [
         "button text": ["Attack", "Dodge", "Run"],
         "button functions": [attack, dodge, goTown],
         text: "You are fighting a monster."
+    },
+    {
+        name: "lose",
+        "button text": ["REPLAY?", "REPLAY?", "REPLAY?"],
+        "button functions": [restart, restart, restart],
+        text: "You die. &#x2620;"
+    },
+    {
+        name: "kill monster",
+        "button text": ["Go to town square", "Go to town square", "Go to town square"],
+        "button functions": [goTown, goTown, goTown],
+        text: "The monster screams \"Arg!\" as it dies. You gain experience points and find gold."
+    },
+    {
+        name: "win",
+        "button text": ["Go town square", "Go town square", "Go town square"],
+        "button functions": [goTown, goTown, goTown],
+        text: "You killed the monster"
     },
 ]
 

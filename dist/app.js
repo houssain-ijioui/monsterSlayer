@@ -91,6 +91,31 @@ const dodge = () => {
 const sellWeapon = () => {
     console.log("sell weapon");
 };
+const restart = () => {
+    xp = 0;
+    health = 100;
+    gold = 50;
+    inventory = ["stick"];
+    currentWeaponIndex = 0;
+    currentMonsterIndex = 0;
+    update(locations[0]);
+    xpText === null || xpText === void 0 ? void 0 : xpText.innerText = 0;
+    healthText === null || healthText === void 0 ? void 0 : healthText.innerText = 100;
+    goldText === null || goldText === void 0 ? void 0 : goldText.innerText = 50;
+};
+const lose = () => {
+    update(locations[4]);
+};
+const killMonster = () => {
+    update(locations[5]);
+    monsterStats === null || monsterStats === void 0 ? void 0 : monsterStats.style.display = "none";
+    monsters[currentMonsterIndex].health = monsters[currentMonsterIndex].maxHealth;
+    currentMonsterIndex = null;
+    gold += 20;
+    xp += 20;
+    goldText === null || goldText === void 0 ? void 0 : goldText.innerText = gold;
+    xpText === null || xpText === void 0 ? void 0 : xpText.innerText = xp;
+};
 function update(location) {
     text === null || text === void 0 ? void 0 : text.innerText = location.text;
     button1 === null || button1 === void 0 ? void 0 : button1.innerText = location["button text"][0];
@@ -108,11 +133,15 @@ const applyDamage = () => {
     // subtract from my health the monster damage
     monsterDamage > 0 && (health -= monsterDamage);
     healthText === null || healthText === void 0 ? void 0 : healthText.innerText = health;
+    if (health <= 0) {
+        lose();
+    }
     // subtract my damage from monster current healt
     myDamage > 0 && (monster.health -= myDamage);
     monsterHealthText === null || monsterHealthText === void 0 ? void 0 : monsterHealthText.innerText = monster.health;
-    console.log("my damage", myDamage);
-    console.log(monsters[currentMonsterIndex]);
+    if (monster.health <= 0) {
+        killMonster();
+    }
 };
 // initialize values
 button1 === null || button1 === void 0 ? void 0 : button1.onclick = goStore;
@@ -142,6 +171,24 @@ const locations = [
         "button text": ["Attack", "Dodge", "Run"],
         "button functions": [attack, dodge, goTown],
         text: "You are fighting a monster."
+    },
+    {
+        name: "lose",
+        "button text": ["REPLAY?", "REPLAY?", "REPLAY?"],
+        "button functions": [restart, restart, restart],
+        text: "You die. &#x2620;"
+    },
+    {
+        name: "kill monster",
+        "button text": ["Go to town square", "Go to town square", "Go to town square"],
+        "button functions": [goTown, goTown, goTown],
+        text: "The monster screams \"Arg!\" as it dies. You gain experience points and find gold."
+    },
+    {
+        name: "win",
+        "button text": ["Go town square", "Go town square", "Go town square"],
+        "button functions": [goTown, goTown, goTown],
+        text: "You killed the monster"
     },
 ];
 const weapons = [
